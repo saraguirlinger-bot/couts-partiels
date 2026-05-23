@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#7A9E7E">
+<title>Module 3 — Seuil de rentabilité</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sage:#7A9E7E;--sage-light:#a8c5ab;--sage-pale:#e8f0e9;
+  --acc-bg:#f9eed8;--acc-val:#7A4F10;--acc:#C17F24;
+  --border:#e2e0d8;--bg:#ffffff;--bg2:#f8f7f4;--bg3:#f1efe8;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#888780;
+  --correct:#2d7a4f;--wrong:#c0392b;--warn:#d4891a;
+  --radius:10px;--radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;padding-bottom:60px}
+
+.topbar{background:var(--sage);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:#fff;text-decoration:none;white-space:nowrap}
+.topbar-title{font-size:14px;font-weight:700;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.module-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap}
+
+.module-header{background:var(--acc-bg);border-bottom:1px solid var(--border);padding:20px 16px}
+.module-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--acc);margin-bottom:4px}
+.module-title{font-size:20px;font-weight:700;color:var(--acc-val);margin-bottom:6px;line-height:1.2}
+.module-desc{font-size:13px;color:var(--text2);line-height:1.5}
+
+.tabs-bar{display:flex;background:#fff;border-bottom:2px solid var(--border);position:sticky;top:53px;z-index:99}
+.tab-btn{flex:1;padding:11px 8px;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);background:none;border:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .2s,border-color .2s}
+.tab-btn.active{color:var(--sage);border-bottom-color:var(--sage)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+.memo-wrap{padding:16px}
+.memo-section{margin-bottom:20px}
+.memo-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--acc-val);margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--acc)}
+.context-card{background:#fff;border-left:4px solid var(--acc);padding:14px 16px;border-radius:0 8px 8px 0;font-size:13px;line-height:1.7}
+.hl{background:var(--acc-bg);padding:1px 4px;border-radius:3px;font-weight:600}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:#fff;font-size:13px;border-radius:var(--radius);overflow:hidden}
+thead tr{background:var(--text);color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:500;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+tbody tr:nth-child(even){background:var(--bg2)}
+tbody td{padding:8px 12px;border-bottom:1px solid var(--border)}
+tbody td:first-child{font-weight:500}
+.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
+
+.ex-wrap{padding:16px}
+.situation-card{background:var(--acc-bg);border-left:3px solid var(--acc);padding:12px 14px;border-radius:0 8px 8px 0;font-size:13px;line-height:1.6;margin-bottom:16px}
+.question-block{background:#fff;border-radius:var(--radius-lg);padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.question-label{font-size:14px;font-weight:600;margin-bottom:4px}
+.question-hint{font-size:12px;color:var(--text3);font-style:italic;margin-bottom:10px}
+.answer-row{display:flex;align-items:center;gap:8px}
+.answer-input{border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);width:160px;background:#fff;transition:border-color .2s;-webkit-appearance:none}
+.answer-input:focus{outline:none;border-color:var(--sage)}
+.answer-unit{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap}
+
+.submit-zone{padding:16px;text-align:center}
+.btn-submit{background:var(--sage);color:#fff;border:none;padding:14px 32px;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:10px;width:100%;max-width:400px}
+
+.results-panel{display:none;margin:0 16px 16px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.results-panel.visible{display:block}
+.results-header{background:var(--text);color:#fff;padding:20px;text-align:center}
+.results-header h2{font-size:16px;margin-bottom:6px}
+.score-big{font-family:'DM Mono',monospace;font-size:48px;font-weight:500;color:var(--sage-light);line-height:1}
+.score-label{font-size:11px;color:#aaa;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.results-body{padding:16px}
+.fb-section{margin-bottom:14px}
+.fb-section h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bg3)}
+.fb-section h3.good{color:var(--correct);border-color:var(--correct)}
+.fb-section h3.bad{color:var(--wrong);border-color:var(--wrong)}
+.fb-section h3.warn{color:var(--warn);border-color:var(--warn)}
+.fb-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.5;margin-bottom:6px}
+
+.nav-modules{margin:16px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border)}
+.nav-modules-title{padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border)}
+.nav-module-link{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;text-decoration:none;color:var(--text);border-bottom:1px solid var(--border);font-size:13px;font-weight:500}
+.nav-module-link:last-child{border-bottom:none}
+.nav-module-link:hover{background:var(--bg2)}
+.nav-module-num{font-size:10px;font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.footer{text-align:center;padding:20px;font-size:12px;color:var(--text3)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back-btn" href="index.html">← Accueil</a>
+  <div class="topbar-title">Menuiserie Duval</div>
+  <div class="module-badge">Module 3</div>
+</div>
+
+<div class="module-header">
+  <div class="module-num">Module 3 — Rentabilité</div>
+  <div class="module-title">Seuil de rentabilité & Point mort</div>
+  <div class="module-desc">Calculez le SR et le point mort après une hausse du coût des matières premières.</div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="showTab('exercice',this)">📝 Exercice</button>
+  <button class="tab-btn" onclick="showTab('memo',this)">📋 Mémo</button>
+</div>
+
+<!-- MÉMO -->
+<div class="tab-panel" id="panel-memo">
+  <div class="memo-wrap">
+    <div class="memo-section">
+      <div class="memo-section-title">Charges mensuelles complètes</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Charge</th><th class="num">Montant</th></tr></thead>
+          <tbody>
+            <tr><td>Loyer de l'atelier</td><td class="num">3 200 €</td></tr>
+            <tr><td>Salaires personnel administratif</td><td class="num">4 500 €</td></tr>
+            <tr><td>Amortissement des machines</td><td class="num">1 800 €</td></tr>
+            <tr><td>Assurances</td><td class="num">420 €</td></tr>
+            <tr><td>Abonnement logiciel</td><td class="num">180 €</td></tr>
+            <tr><td>Matières premières bois (portes)</td><td class="num">17 000 €</td></tr>
+            <tr><td>Matières premières bois (fenêtres)</td><td class="num">21 750 €</td></tr>
+            <tr><td>Énergie de production</td><td class="num">5 100 €</td></tr>
+            <tr><td>Emballages</td><td class="num">2 200 €</td></tr>
+            <tr><td>Sous-traitance finition</td><td class="num">7 950 €</td></tr>
+            <tr><td>Commissions commerciales</td><td class="num">6 800 €</td></tr>
+            <tr><td>Maintenance des machines</td><td class="num">950 €</td></tr>
+            <tr><td>Téléphone et internet</td><td class="num">290 €</td></tr>
+            <tr><td>Électricité (abonnement + conso)</td><td class="num">680 €</td></tr>
+            <tr><td>Publicité et marketing</td><td class="num">800 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="memo-section">
+      <div class="memo-section-title">Rappel — Classification (Étape 0)</div>
+      <div class="context-card">
+        <strong>Charges fixes</strong> : Loyer, Salaires admin, Amortissement, Assurances, Abonnement logiciel, Publicité, <em>+ composante fixe des semi-fixes</em><br><br>
+        <strong>Semi-fixes</strong> : Maintenance, Téléphone, Électricité<br><br>
+        <strong>Charges variables</strong> : Matières premières, Énergie, Emballages, Sous-traitance, Commissions
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXERCICE -->
+<div class="tab-panel active" id="panel-exercice">
+  <div class="ex-wrap">
+    <div class="situation-card">
+      Le prix du bois augmente de <strong>+20 %</strong>, impactant uniquement les <strong>matières premières</strong>. On raisonne sur l'ensemble de l'activité (portes + fenêtres).
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">3.1 — Nouveau coût total des matières premières</div>
+      <div class="question-hint">Appliquez +20 % sur le total des MP du tableau de charges.</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_new_mp" placeholder="0"><span class="answer-unit">€</span></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">3.2 — Total des charges fixes mensuelles</div>
+      <div class="question-hint">Utilisez votre classification. Pour les semi-fixes, retenez leur composante fixe.</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_cf_total" placeholder="0"><span class="answer-unit">€</span></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">3.3 — Chiffre d'affaires total mensuel</div>
+      <div class="question-hint">CA = (200 × 320) + (150 × 480)</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_ca_total" placeholder="0"><span class="answer-unit">€</span></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">3.4 — Nouveau taux de MCV global</div>
+      <div class="question-hint">Recalculez avec les nouveaux coûts variables. Exprimez en % (2 décimales).</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_new_tmcv" placeholder="0.00"><span class="answer-unit">%</span></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">3.5 — Seuil de rentabilité (en valeur)</div>
+      <div class="question-hint">SR = Charges fixes / Taux de MCV</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_sr" placeholder="0"><span class="answer-unit">€</span></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">3.6 — Point mort (en jours)</div>
+      <div class="question-hint">PM = SR / CA mensuel × 30 jours — arrondi à l'entier supérieur.</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_pm" placeholder="0"><span class="answer-unit">jours</span></div>
+    </div>
+  </div>
+
+  <div class="submit-zone">
+    <button class="btn-submit" onclick="soumettre()">Valider mes réponses</button>
+  </div>
+
+  <div class="results-panel" id="results-panel">
+    <div class="results-header">
+      <h2 id="results-name">Résultats</h2>
+      <div class="score-big" id="score-display">—</div>
+      <div class="score-label">/ 4 points</div>
+    </div>
+    <div class="results-body" id="results-body"></div>
+  </div>
+
+  <div class="nav-modules">
+    <div class="nav-modules-title">Continuer vers</div>
+    <a class="nav-module-link" href="module-4.html">
+      <div><div class="nav-module-num">Module 4</div>Prix de vente cible</div>
+      <span style="color:var(--sage)">›</span>
+    </a>
+  </div>
+</div>
+
+<div class="footer">Menuiserie Duval · Horizon PME Centre de formation</div>
+
+<script>
+const A={new_mp:46500,cf_total:11830,ca_total:136000,new_tmcv:49.60,sr:23852,pm:6};
+function tol(got,exp,pct=2){if(exp===0)return got===0;return Math.abs((got-exp)/exp)<=pct/100;}
+function num(id){return parseFloat(document.getElementById(id)?.value)||0;}
+
+function showTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function soumettre(){
+  let correct=0;
+  if(tol(num('q_new_mp'),A.new_mp)) correct++;
+  if(tol(num('q_cf_total'),A.cf_total,8)) correct++;
+  if(tol(num('q_ca_total'),A.ca_total)) correct++;
+  if(tol(num('q_new_tmcv'),A.new_tmcv,3)) correct++;
+  if(tol(num('q_sr'),A.sr,5)) correct++;
+  if(Math.abs(num('q_pm')-A.pm)<=1) correct++;
+  const score=Math.min(Math.round((correct/6)*4*10)/10,4);
+
+  const nom=(()=>{try{const p=JSON.parse(sessionStorage.getItem('duval_profil'));return p?p.prenom+' '+p.nom:'';}catch(e){return '';}})();
+  document.getElementById('results-name').textContent=nom||'Résultats';
+  document.getElementById('score-display').textContent=score.toFixed(1);
+
+  let html='';
+  if(correct>=5) html+=`<div class="fb-section"><h3 class="good">Excellent</h3><div class="fb-item"><span>✅</span><span>Maîtrise solide du seuil de rentabilité et du point mort.</span></div></div>`;
+  else if(correct>=3) html+=`<div class="fb-section"><h3 class="warn">Bien</h3><div class="fb-item"><span>⚠️</span><span>${correct}/6 — Revoir le taux de MCV global ou la formule SR = CF / Taux MCV.</span></div></div>`;
+  else html+=`<div class="fb-section"><h3 class="bad">À retravailler</h3><div class="fb-item"><span>❌</span><span>${correct}/6 — Notions de SR et point mort à retravailler en profondeur.</span></div></div>`;
+
+  html+=`<div class="fb-section"><h3 style="color:var(--text3);border-color:var(--border)">Corrigé</h3>
+    <div class="fb-item"><span>📌</span><span>Nouvelles MP : <strong>46 500 €</strong> (38 750 × 1,20)</span></div>
+    <div class="fb-item"><span>📌</span><span>Charges fixes : <strong>11 830 €</strong> (loyer + salaires + amort. + assurances + logiciel + pub + part fixe semi-fixes)</span></div>
+    <div class="fb-item"><span>📌</span><span>CA total : <strong>136 000 €</strong> (64 000 + 72 000)</span></div>
+    <div class="fb-item"><span>📌</span><span>Nouveau taux MCV : <strong>49,60 %</strong></span></div>
+    <div class="fb-item"><span>📌</span><span>Seuil de rentabilité : <strong>23 852 €</strong></span></div>
+    <div class="fb-item"><span>📌</span><span>Point mort : <strong>6 jours</strong></span></div>
+  </div>`;
+
+  document.getElementById('results-body').innerHTML=html;
+  const panel=document.getElementById('results-panel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+
+  const profil=(()=>{try{return JSON.parse(sessionStorage.getItem('duval_profil'))||{};}catch(e){return {};}})();
+  const force = correct>=5 ? 'Module 3 — Seuil de rentabilité : Maîtrise solide du SR et du point mort.' : '';
+  const faiblesse = correct<3 ? 'Module 3 — Seuil de rentabilité : Notions de SR et point mort à retravailler.' : correct<5 ? 'Module 3 — Seuil de rentabilité : Revoir taux de MCV global ou formule SR = CF / Taux MCV.' : '';
+  fetch('https://www.horizonpme.fr/save-results.php',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      nom:profil.nom||'',prenom:profil.prenom||'',classe:profil.classe||'',
+      score,detail:{seuil_rentabilite:score},
+      forces:force,faiblesses:faiblesse,conclusion:''
+    })
+  }).catch(()=>{});
+}
+</script>
+</body>
+</html>
