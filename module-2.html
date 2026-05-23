@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#7A9E7E">
+<title>Module 2 — Coût marginal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sage:#7A9E7E;--sage-light:#a8c5ab;--sage-pale:#e8f0e9;
+  --acc-bg:#EEEDFE;--acc-val:#26215C;--acc:#534AB7;
+  --border:#e2e0d8;--bg:#ffffff;--bg2:#f8f7f4;--bg3:#f1efe8;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#888780;
+  --correct:#2d7a4f;--wrong:#c0392b;--warn:#d4891a;
+  --radius:10px;--radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;padding-bottom:60px}
+
+.topbar{background:var(--sage);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:#fff;text-decoration:none;white-space:nowrap}
+.topbar-title{font-size:14px;font-weight:700;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.module-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap}
+
+.module-header{background:var(--acc-bg);border-bottom:1px solid var(--border);padding:20px 16px}
+.module-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--acc);margin-bottom:4px}
+.module-title{font-size:20px;font-weight:700;color:var(--acc-val);margin-bottom:6px;line-height:1.2}
+.module-desc{font-size:13px;color:var(--text2);line-height:1.5}
+
+.tabs-bar{display:flex;background:#fff;border-bottom:2px solid var(--border);position:sticky;top:53px;z-index:99}
+.tab-btn{flex:1;padding:11px 8px;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);background:none;border:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .2s,border-color .2s}
+.tab-btn.active{color:var(--sage);border-bottom-color:var(--sage)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+.memo-wrap{padding:16px}
+.memo-section{margin-bottom:20px}
+.memo-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#534AB7;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--acc)}
+.context-card{background:#fff;border-left:4px solid var(--acc);padding:14px 16px;border-radius:0 8px 8px 0;font-size:13px;line-height:1.7}
+.hl{background:var(--acc-bg);padding:1px 4px;border-radius:3px;font-weight:600}
+
+.ex-wrap{padding:16px}
+.situation-card{background:var(--acc-bg);border-left:3px solid var(--acc);padding:12px 14px;border-radius:0 8px 8px 0;font-size:13px;line-height:1.6;margin-bottom:16px}
+.question-block{background:#fff;border-radius:var(--radius-lg);padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.question-label{font-size:14px;font-weight:600;margin-bottom:4px}
+.question-hint{font-size:12px;color:var(--text3);font-style:italic;margin-bottom:10px}
+.answer-row{display:flex;align-items:center;gap:8px}
+.answer-input{border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);width:160px;background:#fff;transition:border-color .2s;-webkit-appearance:none}
+.answer-input:focus{outline:none;border-color:var(--sage)}
+.answer-unit{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap}
+.answer-select{border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;font-family:'Outfit',sans-serif;background:#fff;color:var(--text);min-width:220px;cursor:pointer}
+.answer-select:focus{outline:none;border-color:var(--sage)}
+
+.submit-zone{padding:16px;text-align:center}
+.btn-submit{background:var(--sage);color:#fff;border:none;padding:14px 32px;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:10px;width:100%;max-width:400px}
+
+.results-panel{display:none;margin:0 16px 16px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.results-panel.visible{display:block}
+.results-header{background:var(--text);color:#fff;padding:20px;text-align:center}
+.results-header h2{font-size:16px;margin-bottom:6px}
+.score-big{font-family:'DM Mono',monospace;font-size:48px;font-weight:500;color:var(--sage-light);line-height:1}
+.score-label{font-size:11px;color:#aaa;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.results-body{padding:16px}
+.fb-section{margin-bottom:14px}
+.fb-section h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bg3)}
+.fb-section h3.good{color:var(--correct);border-color:var(--correct)}
+.fb-section h3.bad{color:var(--wrong);border-color:var(--wrong)}
+.fb-section h3.warn{color:var(--warn);border-color:var(--warn)}
+.fb-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.5;margin-bottom:6px}
+
+.nav-modules{margin:16px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border)}
+.nav-modules-title{padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border)}
+.nav-module-link{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;text-decoration:none;color:var(--text);border-bottom:1px solid var(--border);font-size:13px;font-weight:500}
+.nav-module-link:last-child{border-bottom:none}
+.nav-module-link:hover{background:var(--bg2)}
+.nav-module-num{font-size:10px;font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.footer{text-align:center;padding:20px;font-size:12px;color:var(--text3)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back-btn" href="index.html">← Accueil</a>
+  <div class="topbar-title">Menuiserie Duval</div>
+  <div class="module-badge">Module 2</div>
+</div>
+
+<div class="module-header">
+  <div class="module-num">Module 2 — Analyse des coûts</div>
+  <div class="module-title">Coût marginal — Commande exceptionnelle</div>
+  <div class="module-desc">Évaluez la pertinence d'accepter une commande supplémentaire à prix réduit.</div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="showTab('exercice',this)">📝 Exercice</button>
+  <button class="tab-btn" onclick="showTab('memo',this)">📋 Mémo</button>
+</div>
+
+<!-- MÉMO -->
+<div class="tab-panel" id="panel-memo">
+  <div class="memo-wrap">
+    <div class="memo-section">
+      <div class="memo-section-title">Rappel — Coût variable unitaire portes</div>
+      <div class="context-card">
+        Charges variables unitaires portes :<br>
+        Matières premières <span class="hl">85 €</span> + Énergie <span class="hl">12 €</span> + Emballage <span class="hl">5 €</span> + Sous-traitance <span class="hl">18 €</span> + Commissions <span class="hl">16 €</span> = <span class="hl">136 €/u</span>
+      </div>
+    </div>
+    <div class="memo-section">
+      <div class="memo-section-title">Contexte de la commande</div>
+      <div class="context-card">
+        Un promoteur immobilier propose <span class="hl">40 portes supplémentaires</span> à <span class="hl">260 € l'unité</span>.<br><br>
+        La capacité de production permet d'absorber cette commande <strong>sans investissement supplémentaire</strong>. Les charges fixes restent identiques.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXERCICE -->
+<div class="tab-panel active" id="panel-exercice">
+  <div class="ex-wrap">
+    <div class="situation-card">
+      Un promoteur propose <strong>40 portes supplémentaires à 260 €/u</strong>. La capacité de production peut absorber cette commande sans charges fixes supplémentaires.
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">2.1 — Coût marginal total de la commande</div>
+      <div class="question-hint">Seules les charges engendrées par cette commande supplémentaire.</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_cm_total" placeholder="0"><span class="answer-unit">€</span></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">2.2 — Coût marginal unitaire</div>
+      <div class="question-hint">Ramenez le coût marginal à une unité.</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_cm_unitaire" placeholder="0"><span class="answer-unit">€/u</span></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">2.3 — Résultat marginal de la commande</div>
+      <div class="question-hint">Impact financier net = Recette − Coût marginal total</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_rm_total" placeholder="0"><span class="answer-unit">€</span></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">2.4 — Décision</div>
+      <div class="question-hint">La Menuiserie Duval doit-elle accepter cette commande ?</div>
+      <div class="answer-row">
+        <select class="answer-select" id="q_decision">
+          <option value="">— Choisir —</option>
+          <option value="oui">Oui, accepter la commande</option>
+          <option value="non">Non, refuser la commande</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="submit-zone">
+    <button class="btn-submit" onclick="soumettre()">Valider mes réponses</button>
+  </div>
+
+  <div class="results-panel" id="results-panel">
+    <div class="results-header">
+      <h2 id="results-name">Résultats</h2>
+      <div class="score-big" id="score-display">—</div>
+      <div class="score-label">/ 4 points</div>
+    </div>
+    <div class="results-body" id="results-body"></div>
+  </div>
+
+  <div class="nav-modules">
+    <div class="nav-modules-title">Continuer vers</div>
+    <a class="nav-module-link" href="module-3.html">
+      <div><div class="nav-module-num">Module 3</div>Seuil de rentabilité & Point mort</div>
+      <span style="color:var(--sage)">›</span>
+    </a>
+    <a class="nav-module-link" href="module-4.html">
+      <div><div class="nav-module-num">Module 4</div>Prix de vente cible</div>
+      <span style="color:var(--sage)">›</span>
+    </a>
+  </div>
+</div>
+
+<div class="footer">Menuiserie Duval · Horizon PME Centre de formation</div>
+
+<script>
+
+// Lire profil depuis URL params (transmis par index.html) ou sessionStorage
+function lireProfil() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const nom = params.get('nom');
+    const prenom = params.get('prenom');
+    const classe = params.get('classe') || '';
+    if (nom && prenom) {
+      // Sauvegarder dans sessionStorage pour les pages suivantes
+      sessionStorage.setItem('duval_profil', JSON.stringify({nom, prenom, classe}));
+      return {nom, prenom, classe};
+    }
+  } catch(e) {}
+  // Fallback sessionStorage
+  try {
+    const p = JSON.parse(sessionStorage.getItem('duval_profil'));
+    if (p && p.nom) return p;
+  } catch(e) {}
+  return {};
+}
+
+// Ajouter le profil dans les liens vers d'autres modules
+function enrichirLiens() {
+  const p = lireProfil();
+  if (!p.nom) return;
+  document.querySelectorAll('a[href$=".html"]').forEach(a => {
+    try {
+      const url = new URL(a.href);
+      // Ne pas modifier les liens externes
+      if (url.hostname === window.location.hostname || a.href.indexOf('http') === -1) {
+        url.searchParams.set('nom', p.nom);
+        url.searchParams.set('prenom', p.prenom);
+        url.searchParams.set('classe', p.classe || '');
+        a.href = url.toString();
+      }
+    } catch(e) {}
+  });
+}
+
+window.addEventListener('DOMContentLoaded', enrichirLiens);
+
+const A={cm_total:5440,cm_unitaire:136,rm_total:960,decision:'oui'};
+function tol(got,exp,pct=2){if(exp===0)return got===0;return Math.abs((got-exp)/exp)<=pct/100;}
+function num(id){return parseFloat(document.getElementById(id)?.value)||0;}
+function val(id){return document.getElementById(id)?.value||'';}
+
+function showTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function soumettre(){
+  let correct=0;
+  if(tol(num('q_cm_total'),A.cm_total)) correct++;
+  if(tol(num('q_cm_unitaire'),A.cm_unitaire)) correct++;
+  if(tol(num('q_rm_total'),A.rm_total)) correct++;
+  if(val('q_decision')===A.decision) correct++;
+  const score=Math.round((correct/4)*4*10)/10;
+
+  const nom=(()=>{try{const p=JSON.parse(sessionStorage.getItem('duval_profil'));return p?p.prenom+' '+p.nom:'';}catch(e){return '';}})();
+  document.getElementById('results-name').textContent=nom||'Résultats';
+  document.getElementById('score-display').textContent=score.toFixed(1);
+
+  let html='';
+  if(correct===4) html+=`<div class="fb-section"><h3 class="good">Excellent</h3><div class="fb-item"><span>✅</span><span>Raisonnement complet et décision correctement justifiée.</span></div></div>`;
+  else if(correct>=3) html+=`<div class="fb-section"><h3 class="warn">Bien</h3><div class="fb-item"><span>⚠️</span><span>${correct}/4 — Logique globale acquise, une étape à revoir.</span></div></div>`;
+  else html+=`<div class="fb-section"><h3 class="bad">À retravailler</h3><div class="fb-item"><span>❌</span><span>${correct}/4 — La notion de coût marginal et la prise de décision sont à consolider.</span></div></div>`;
+
+  html+=`<div class="fb-section"><h3 style="color:var(--text3);border-color:var(--border)">Corrigé</h3>
+    <div class="fb-item"><span>📌</span><span>Coût marginal total : <strong>5 440 €</strong> (40 × 136 €)</span></div>
+    <div class="fb-item"><span>📌</span><span>Coût marginal unitaire : <strong>136 €/u</strong> (= CV unitaire, car pas de CF supplémentaires)</span></div>
+    <div class="fb-item"><span>📌</span><span>Résultat marginal : <strong>+ 960 €</strong> (40 × 260 − 5 440)</span></div>
+    <div class="fb-item"><span>📌</span><span>Décision : <strong>Oui</strong> — la commande dégage un résultat positif de 960 €.</span></div>
+  </div>`;
+
+  document.getElementById('results-body').innerHTML=html;
+  const panel=document.getElementById('results-panel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+
+  const profil=lireProfil();
+  const force = correct===4 ? 'Module 2 — Coût marginal : Raisonnement complet et décision correctement justifiée.' : '';
+  const faiblesse = correct<3 ? 'Module 2 — Coût marginal : Notion de coût marginal et prise de décision à consolider.' : correct<4 ? 'Module 2 — Coût marginal : Logique globale acquise, une étape à revoir.' : '';
+  fetch('https://www.horizonpme.fr/save-results.php',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      nom:profil.nom||'',prenom:profil.prenom||'',classe:profil.classe||'',
+      score,detail:{cout_marginal:score},
+      forces:force,faiblesses:faiblesse,conclusion:''
+    })
+  }).catch(()=>{});
+}
+</script>
+</body>
+</html>

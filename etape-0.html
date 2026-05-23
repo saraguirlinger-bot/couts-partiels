@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#7A9E7E">
+<title>Étape 0 — Classification des charges</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sage:#7A9E7E;--sage-light:#a8c5ab;--sage-dark:#5a7a5e;--sage-pale:#e8f0e9;
+  --acc-bg:#f0f4f0;--acc-val:#3d5c40;--acc:#7A9E7E;
+  --border:#e2e0d8;--bg:#ffffff;--bg2:#f8f7f4;--bg3:#f1efe8;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#888780;
+  --correct:#2d7a4f;--wrong:#c0392b;--warn:#d4891a;
+  --radius:10px;--radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;padding-bottom:60px}
+
+/* NAV */
+.topbar{background:var(--sage);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:#fff;text-decoration:none;white-space:nowrap}
+.topbar-title{font-size:14px;font-weight:700;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.module-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap}
+
+/* HEADER MODULE */
+.module-header{background:var(--acc-bg);border-bottom:1px solid var(--border);padding:20px 16px}
+.module-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--acc);margin-bottom:4px}
+.module-title{font-size:20px;font-weight:700;color:var(--acc-val);margin-bottom:6px;line-height:1.2}
+.module-desc{font-size:13px;color:var(--text2);line-height:1.5}
+
+/* MEMO TAB */
+.tabs-bar{display:flex;background:#fff;border-bottom:2px solid var(--border);position:sticky;top:53px;z-index:99}
+.tab-btn{flex:1;padding:11px 8px;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);background:none;border:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .2s,border-color .2s}
+.tab-btn.active{color:var(--sage);border-bottom-color:var(--sage)}
+
+/* PANELS */
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* MEMO */
+.memo-wrap{padding:16px}
+.memo-section{margin-bottom:20px}
+.memo-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--sage-dark);margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--sage)}
+.context-card{background:#fff;border-left:4px solid var(--sage);padding:14px 16px;border-radius:0 8px 8px 0;font-size:13px;line-height:1.7}
+.hl{background:var(--sage-pale);padding:1px 4px;border-radius:3px;font-weight:600}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:#fff;font-size:13px;border-radius:var(--radius);overflow:hidden}
+thead tr{background:var(--text);color:#fff}
+thead th{padding:9px 12px;text-align:left;font-weight:500;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+tbody tr:nth-child(even){background:var(--bg2)}
+tbody td{padding:8px 12px;border-bottom:1px solid var(--border)}
+tbody td:first-child{font-weight:500}
+.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
+
+/* EXERCISE */
+.ex-wrap{padding:16px}
+.situation-card{background:var(--sage-pale);border-left:3px solid var(--sage);padding:12px 14px;border-radius:0 8px 8px 0;font-size:13px;line-height:1.6;margin-bottom:16px}
+
+/* CLASSIFICATION TABLE */
+.classif-table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.classif-table thead tr{background:var(--sage);color:#fff}
+.classif-table thead th{padding:9px 12px;text-align:left;font-weight:600;font-size:11px;letter-spacing:.04em}
+.classif-table tbody tr:nth-child(even){background:var(--bg2)}
+.classif-table tbody td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.classif-select{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;font-family:'Outfit',sans-serif;background:#fff;color:var(--text);cursor:pointer}
+.classif-select:focus{outline:none;border-color:var(--sage)}
+
+/* RECAP */
+.btn-recap{margin-top:14px;background:var(--sage);color:#fff;border:none;padding:10px 20px;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border-radius:8px;width:100%}
+.recap-block{display:none;margin-top:14px;border:1.5px solid var(--sage-light);border-radius:var(--radius-lg);overflow:hidden}
+.recap-block.visible{display:block}
+.recap-header{background:var(--sage-pale);padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--sage-dark);border-bottom:1px solid var(--sage-light)}
+.recap-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.recap-group h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.recap-group.fixe h4{color:var(--sage-dark)}
+.recap-group.variable h4{color:#2a6496}
+.recap-group.semi h4{color:var(--warn)}
+.recap-group ul{list-style:none}
+.recap-group ul li{font-size:12px;line-height:1.7;color:var(--text)}
+.recap-group ul li::before{content:'— ';color:var(--text3)}
+.recap-note{font-size:11px;color:var(--text3);font-style:italic;padding:8px 14px;background:var(--bg2);border-top:1px solid var(--border)}
+
+/* SUBMIT */
+.submit-zone{padding:16px;text-align:center}
+.btn-submit{background:var(--sage);color:#fff;border:none;padding:14px 32px;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:10px;width:100%;max-width:400px}
+
+/* RESULTS */
+.results-panel{display:none;margin:0 16px 16px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.results-panel.visible{display:block}
+.results-header{background:var(--text);color:#fff;padding:20px;text-align:center}
+.results-header h2{font-size:16px;margin-bottom:6px}
+.score-big{font-family:'DM Mono',monospace;font-size:48px;font-weight:500;color:var(--sage-light);line-height:1}
+.score-label{font-size:11px;color:#aaa;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.results-body{padding:16px}
+.fb-section{margin-bottom:14px}
+.fb-section h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bg3)}
+.fb-section h3.good{color:var(--correct);border-color:var(--correct)}
+.fb-section h3.bad{color:var(--wrong);border-color:var(--wrong)}
+.fb-section h3.warn{color:var(--warn);border-color:var(--warn)}
+.fb-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.5;margin-bottom:6px}
+
+/* NAV MODULES */
+.nav-modules{margin:16px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border)}
+.nav-modules-title{padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border)}
+.nav-module-link{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;text-decoration:none;color:var(--text);border-bottom:1px solid var(--border);font-size:13px;font-weight:500}
+.nav-module-link:last-child{border-bottom:none}
+.nav-module-link:hover{background:var(--bg2)}
+.nav-module-num{font-size:10px;font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+
+.footer{text-align:center;padding:20px;font-size:12px;color:var(--text3)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="back-btn" href="index.html">← Accueil</a>
+  <div class="topbar-title">Menuiserie Duval</div>
+  <div class="module-badge">Étape 0</div>
+</div>
+
+<!-- MODULE HEADER -->
+<div class="module-header">
+  <div class="module-num">Étape 0 — Préambule</div>
+  <div class="module-title">Classification des charges</div>
+  <div class="module-desc">Classez chaque charge selon sa nature : fixe, variable ou semi-fixe.</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="showTab('exercice',this)">📝 Exercice</button>
+  <button class="tab-btn" onclick="showTab('memo',this)">📋 Mémo</button>
+</div>
+
+<!-- MÉMO -->
+<div class="tab-panel" id="panel-memo">
+  <div class="memo-wrap">
+    <div class="memo-section">
+      <div class="memo-section-title">Contexte</div>
+      <div class="context-card">
+        La <span class="hl">Menuiserie Duval</span> est une PME spécialisée dans la fabrication de <span class="hl">portes intérieures</span> et <span class="hl">fenêtres en bois</span>. La période de référence est <span class="hl">un mois</span>. Capacité normale : <span class="hl">200 portes</span> et <span class="hl">150 fenêtres</span>.
+      </div>
+    </div>
+    <div class="memo-section">
+      <div class="memo-section-title">Tableau des charges mensuelles</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nature de la charge</th><th class="num">Montant</th></tr></thead>
+          <tbody>
+            <tr><td>Loyer de l'atelier</td><td class="num">3 200 €</td></tr>
+            <tr><td>Salaires personnel administratif</td><td class="num">4 500 €</td></tr>
+            <tr><td>Amortissement des machines</td><td class="num">1 800 €</td></tr>
+            <tr><td>Assurances</td><td class="num">420 €</td></tr>
+            <tr><td>Abonnement logiciel</td><td class="num">180 €</td></tr>
+            <tr><td>Matières premières bois (portes)</td><td class="num">17 000 €</td></tr>
+            <tr><td>Matières premières bois (fenêtres)</td><td class="num">21 750 €</td></tr>
+            <tr><td>Énergie de production</td><td class="num">5 100 €</td></tr>
+            <tr><td>Emballages</td><td class="num">2 200 €</td></tr>
+            <tr><td>Sous-traitance finition</td><td class="num">7 950 €</td></tr>
+            <tr><td>Commissions commerciales</td><td class="num">6 800 €</td></tr>
+            <tr><td>Maintenance des machines</td><td class="num">950 €</td></tr>
+            <tr><td>Téléphone et internet</td><td class="num">290 €</td></tr>
+            <tr><td>Électricité (abonnement + conso)</td><td class="num">680 €</td></tr>
+            <tr><td>Publicité et marketing</td><td class="num">800 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXERCICE -->
+<div class="tab-panel active" id="panel-exercice">
+  <div class="ex-wrap">
+    <div class="situation-card">
+      Classez chacune des <strong>15 charges</strong> du tableau (accessible dans l'onglet <strong>Mémo</strong>) selon leur nature : <strong>fixe</strong>, <strong>variable</strong> ou <strong>semi-fixe</strong>.
+    </div>
+
+    <table class="classif-table">
+      <thead><tr><th>Charge</th><th>Nature</th></tr></thead>
+      <tbody id="classif-tbody"></tbody>
+    </table>
+
+    <button class="btn-recap" onclick="genererRecap()">📊 Générer mon récapitulatif</button>
+
+    <div class="recap-block" id="recap-block">
+      <div class="recap-header">Récapitulatif de votre classification</div>
+      <div class="recap-body">
+        <div class="recap-group fixe"><h4>Charges fixes</h4><ul id="recap-fixe"></ul></div>
+        <div class="recap-group variable"><h4>Charges variables</h4><ul id="recap-variable"></ul></div>
+        <div class="recap-group semi"><h4>Charges semi-fixes</h4><ul id="recap-semi"></ul></div>
+      </div>
+      <div class="recap-note">Vous pouvez modifier vos choix et régénérer à tout moment.</div>
+    </div>
+  </div>
+
+  <div class="submit-zone">
+    <button class="btn-submit" onclick="soumettre()">Valider ma classification</button>
+  </div>
+
+  <div class="results-panel" id="results-panel">
+    <div class="results-header">
+      <h2 id="results-name">Résultats</h2>
+      <div class="score-big" id="score-display">—</div>
+      <div class="score-label">/ 4 points</div>
+    </div>
+    <div class="results-body" id="results-body"></div>
+  </div>
+
+  <!-- NAV VERS MODULES SUIVANTS -->
+  <div class="nav-modules">
+    <div class="nav-modules-title">Continuer vers</div>
+    <a class="nav-module-link" href="module-1.html">
+      <div><div class="nav-module-num">Module 1</div>Marge sur coût variable</div>
+      <span style="color:var(--sage)">›</span>
+    </a>
+    <a class="nav-module-link" href="module-2.html">
+      <div><div class="nav-module-num">Module 2</div>Coût marginal</div>
+      <span style="color:var(--sage)">›</span>
+    </a>
+  </div>
+</div>
+
+<div class="footer">Menuiserie Duval · Horizon PME Centre de formation</div>
+
+<script>
+
+// Lire profil depuis URL params (transmis par index.html) ou sessionStorage
+function lireProfil() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const nom = params.get('nom');
+    const prenom = params.get('prenom');
+    const classe = params.get('classe') || '';
+    if (nom && prenom) {
+      // Sauvegarder dans sessionStorage pour les pages suivantes
+      sessionStorage.setItem('duval_profil', JSON.stringify({nom, prenom, classe}));
+      return {nom, prenom, classe};
+    }
+  } catch(e) {}
+  // Fallback sessionStorage
+  try {
+    const p = JSON.parse(sessionStorage.getItem('duval_profil'));
+    if (p && p.nom) return p;
+  } catch(e) {}
+  return {};
+}
+
+// Ajouter le profil dans les liens vers d'autres modules
+function enrichirLiens() {
+  const p = lireProfil();
+  if (!p.nom) return;
+  document.querySelectorAll('a[href$=".html"]').forEach(a => {
+    try {
+      const url = new URL(a.href);
+      // Ne pas modifier les liens externes
+      if (url.hostname === window.location.hostname || a.href.indexOf('http') === -1) {
+        url.searchParams.set('nom', p.nom);
+        url.searchParams.set('prenom', p.prenom);
+        url.searchParams.set('classe', p.classe || '');
+        a.href = url.toString();
+      }
+    } catch(e) {}
+  });
+}
+
+window.addEventListener('DOMContentLoaded', enrichirLiens);
+
+const CHARGES = [
+  { label: "Loyer de l'atelier", answer: "fixe" },
+  { label: "Salaires du personnel administratif", answer: "fixe" },
+  { label: "Amortissement des machines", answer: "fixe" },
+  { label: "Assurances (multirisque + RC pro)", answer: "fixe" },
+  { label: "Abonnement logiciel de gestion", answer: "fixe" },
+  { label: "Matières premières bois (portes)", answer: "variable" },
+  { label: "Matières premières bois (fenêtres)", answer: "variable" },
+  { label: "Énergie de production", answer: "variable" },
+  { label: "Emballages", answer: "variable" },
+  { label: "Sous-traitance finition", answer: "variable" },
+  { label: "Commissions commerciales", answer: "variable" },
+  { label: "Maintenance des machines", answer: "semi-fixe" },
+  { label: "Téléphone et internet", answer: "semi-fixe" },
+  { label: "Électricité (abonnement + consommation)", answer: "semi-fixe" },
+  { label: "Publicité et marketing", answer: "fixe" },
+];
+
+const tbody = document.getElementById('classif-tbody');
+CHARGES.forEach((c, i) => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${c.label}</td><td>
+    <select class="classif-select" id="classif_${i}" onchange="document.getElementById('recap-block').classList.remove('visible')">
+      <option value="">— Choisir —</option>
+      <option value="fixe">Charge fixe</option>
+      <option value="variable">Charge variable</option>
+      <option value="semi-fixe">Charge semi-fixe</option>
+    </select></td>`;
+  tbody.appendChild(tr);
+});
+
+function genererRecap() {
+  const fixe=[], variable=[], semi=[];
+  CHARGES.forEach((c,i)=>{
+    const v=document.getElementById('classif_'+i).value;
+    if(v==='fixe') fixe.push(c.label);
+    else if(v==='variable') variable.push(c.label);
+    else if(v==='semi-fixe') semi.push(c.label);
+  });
+  const fill=(id,arr)=>{
+    document.getElementById(id).innerHTML=arr.length
+      ?arr.map(l=>`<li>${l}</li>`).join('')
+      :`<li style="color:var(--text3);font-style:italic">Aucune</li>`;
+  };
+  fill('recap-fixe',fixe);fill('recap-variable',variable);fill('recap-semi',semi);
+  const b=document.getElementById('recap-block');
+  b.classList.add('visible');
+  b.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function soumettre() {
+  let correct=0;
+  CHARGES.forEach((c,i)=>{if(document.getElementById('classif_'+i).value===c.answer)correct++;});
+  const score=Math.round((correct/CHARGES.length)*4*10)/10;
+
+  const nom = (()=>{ const p=lireProfil(); return p.prenom?(p.prenom+' '+p.nom):''; })();
+  document.getElementById('results-name').textContent = nom || 'Résultats';
+  document.getElementById('score-display').textContent = score.toFixed(1);
+
+  let html='';
+  if(correct===CHARGES.length) html+=`<div class="fb-section"><h3 class="good">Excellent</h3><div class="fb-item"><span>✅</span><span>Classification parfaite — ${correct}/${CHARGES.length} charges correctement classées.</span></div></div>`;
+  else if(correct>=12) html+=`<div class="fb-section"><h3 class="warn">Bien</h3><div class="fb-item"><span>⚠️</span><span>${correct}/${CHARGES.length} correctes — Revoir notamment les charges semi-fixes (maintenance, téléphone, électricité).</span></div></div>`;
+  else html+=`<div class="fb-section"><h3 class="bad">À retravailler</h3><div class="fb-item"><span>❌</span><span>${correct}/${CHARGES.length} — La distinction fixe / variable / semi-fixe est à consolider.</span></div></div>`;
+
+  document.getElementById('results-body').innerHTML=html;
+  const panel=document.getElementById('results-panel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+
+  const profil=lireProfil();
+  const force = correct===CHARGES.length ? `Étape 0 — Classification : ${correct}/${CHARGES.length} parfaite.` : '';
+  const faiblesse = correct<12 ? `Étape 0 — Classification : ${correct}/${CHARGES.length} — distinction fixe/variable/semi-fixe à retravailler.` : correct<CHARGES.length ? `Étape 0 — Classification : ${correct}/${CHARGES.length} — revoir les charges semi-fixes.` : '';
+  fetch('https://www.horizonpme.fr/save-results.php',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      nom:profil.nom||'',prenom:profil.prenom||'',classe:profil.classe||'',
+      score,detail:{classification:score},
+      forces:force,faiblesses:faiblesse,conclusion:''
+    })
+  }).catch(()=>{});
+}
+</script>
+</body>
+</html>

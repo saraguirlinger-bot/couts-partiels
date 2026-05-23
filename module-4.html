@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#7A9E7E">
+<title>Module 4 — Prix de vente cible</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sage:#7A9E7E;--sage-light:#a8c5ab;--sage-dark:#5a7a5e;--sage-pale:#e8f0e9;
+  --acc-bg:#FCEBEB;--acc-val:#791F1F;--acc:#A32D2D;
+  --black:#1A1A1A;
+  --border:#e2e0d8;--bg:#ffffff;--bg2:#f8f7f4;--bg3:#f1efe8;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#888780;--gray-mid:#d8d8d5;--gray-dark:#888885;
+  --correct:#2d7a4f;--wrong:#c0392b;--warn:#d4891a;
+  --radius:10px;--radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;padding-bottom:60px}
+
+/* TOPBAR */
+.topbar{background:var(--sage);padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:#fff;text-decoration:none;white-space:nowrap}
+.topbar-title{font-size:14px;font-weight:700;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.module-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap}
+
+/* MODULE HEADER */
+.module-header{background:var(--acc-bg);border-bottom:1px solid var(--border);padding:20px 16px}
+.module-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--acc);margin-bottom:4px}
+.module-title{font-size:20px;font-weight:700;color:var(--acc-val);margin-bottom:6px;line-height:1.2}
+.module-desc{font-size:13px;color:var(--text2);line-height:1.5}
+
+/* TABS */
+.tabs-bar{display:flex;background:#fff;border-bottom:2px solid var(--border);position:sticky;top:53px;z-index:99}
+.tab-btn{flex:1;padding:11px 8px;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);background:none;border:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .2s,border-color .2s}
+.tab-btn.active{color:var(--sage);border-bottom-color:var(--sage)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* MEMO */
+.memo-wrap{padding:16px}
+.memo-section{margin-bottom:20px}
+.memo-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--acc-val);margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--acc)}
+.context-card{background:#fff;border-left:4px solid var(--acc);padding:14px 16px;border-radius:0 8px 8px 0;font-size:13px;line-height:1.7}
+.hl{background:var(--acc-bg);padding:1px 4px;border-radius:3px;font-weight:600}
+
+/* EXERCISE */
+.ex-wrap{padding:16px}
+.situation-card{background:var(--acc-bg);border-left:3px solid var(--acc);padding:12px 14px;border-radius:0 8px 8px 0;font-size:13px;line-height:1.6;margin-bottom:16px}
+.question-block{background:#fff;border-radius:var(--radius-lg);padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.question-label{font-size:14px;font-weight:600;margin-bottom:4px}
+.question-hint{font-size:12px;color:var(--text3);font-style:italic;margin-bottom:10px}
+.answer-row{display:flex;align-items:center;gap:8px}
+.answer-input{border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:15px;color:var(--text);width:160px;background:#fff;transition:border-color .2s;-webkit-appearance:none}
+.answer-input:focus{outline:none;border-color:var(--sage)}
+.answer-unit{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap}
+.conclusion-area{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:12px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);resize:vertical;min-height:100px;transition:border-color .2s}
+.conclusion-area:focus{outline:none;border-color:var(--sage)}
+
+/* SUBMIT */
+.submit-zone{padding:16px;text-align:center}
+.btn-submit{background:var(--sage);color:#fff;border:none;padding:14px 32px;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:10px;width:100%;max-width:400px}
+
+/* MODULE 4 RESULTS */
+.results-panel{display:none;margin:0 16px 16px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.results-panel.visible{display:block}
+.results-header{background:var(--text);color:#fff;padding:20px;text-align:center}
+.results-header h2{font-size:16px;margin-bottom:6px}
+.score-big-sm{font-family:'DM Mono',monospace;font-size:48px;font-weight:500;color:var(--sage-light);line-height:1}
+.score-label{font-size:11px;color:#aaa;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+.results-body{padding:16px}
+.fb-section{margin-bottom:14px}
+.fb-section h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bg3)}
+.fb-section h3.good{color:var(--correct);border-color:var(--correct)}
+.fb-section h3.bad{color:var(--wrong);border-color:var(--wrong)}
+.fb-section h3.warn{color:var(--warn);border-color:var(--warn)}
+.fb-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.5;margin-bottom:6px}
+
+/* ═══ PROFIL COMPLET SUR 20 ═══ */
+.profil-panel{display:none;margin:16px}
+.profil-panel.visible{display:block}
+
+/* Hero profil */
+.profil-hero{background:var(--black);border-left:5px solid var(--sage);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:24px 20px;color:#fff;position:relative;overflow:hidden}
+.profil-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--sage) 0%,transparent 60%)}
+.profil-kicker{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--sage-light);margin-bottom:6px}
+.profil-name{font-family:'DM Serif Display',serif;font-size:24px;line-height:1.1;margin-bottom:3px}
+.profil-name em{color:var(--sage-light);font-style:italic}
+.profil-classe{font-size:12px;color:var(--gray-dark);margin-bottom:18px}
+.profil-score-row{display:flex;align-items:flex-end;gap:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)}
+.score-big-20{font-family:'DM Mono',monospace;font-size:56px;font-weight:500;color:var(--sage-light);line-height:1}
+.score-meta{display:flex;flex-direction:column;gap:5px;padding-bottom:6px}
+.score-sur{font-size:13px;color:var(--gray-dark);font-family:'DM Mono',monospace}
+.score-mention{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;width:fit-content}
+.mention-tb{background:rgba(122,158,126,.3);color:var(--sage-light)}
+.mention-b{background:rgba(212,137,26,.2);color:#f0b040}
+.mention-ab{background:rgba(212,137,26,.15);color:#d4891a}
+.mention-ins{background:rgba(192,57,43,.2);color:#e07060}
+
+/* Modules detail */
+.profil-body{background:#fff;border-radius:0 0 var(--radius-lg) var(--radius-lg);overflow:hidden;border:1px solid var(--border);border-top:none}
+.section-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-dark);margin:14px 14px 8px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--gray-mid)}
+
+.mod-row{display:flex;align-items:stretch;border-bottom:1px solid var(--border)}
+.mod-row:last-child{border-bottom:none}
+.mod-bar{width:5px;flex-shrink:0}
+.mod-content{flex:1;padding:10px 14px}
+.mod-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.mod-name{font-size:13px;font-weight:600}
+.mod-tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:2px}
+.mod-score-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;white-space:nowrap}
+.mod-bar-bg{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:4px}
+.mod-bar-fill{height:100%;border-radius:3px}
+.mod-feedback{font-size:11px;color:var(--text3);font-style:italic}
+
+/* TOTAL ROW */
+.total-row{background:var(--black);display:flex;align-items:center;justify-content:space-between;padding:12px 14px}
+.total-label{font-size:13px;font-weight:700;color:#fff;letter-spacing:.05em;text-transform:uppercase}
+.total-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--sage-light)}
+.total-sur{font-size:12px;color:var(--gray-dark);font-family:'DM Mono',monospace}
+
+/* BILAN */
+.bilan-wrap{padding:0 14px 14px}
+.bilan-section{margin-top:10px}
+.bilan-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.bilan-title.good{color:var(--correct)}
+.bilan-title.bad{color:var(--wrong)}
+.bilan-item{display:flex;align-items:flex-start;gap:6px;font-size:12px;line-height:1.5;margin-bottom:4px;color:var(--text2)}
+
+/* SPINNER */
+.spinner-wrap{padding:20px;text-align:center}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--sage);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-wrap p{font-size:12px;color:var(--text3)}
+
+/* COLORS */
+.c-0{background:var(--sage)} .c-1{background:#3a7d44} .c-2{background:#534AB7} .c-3{background:#C17F24} .c-4{background:#A32D2D}
+
+.footer{text-align:center;padding:20px;font-size:12px;color:var(--text3)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back-btn" href="index.html">← Accueil</a>
+  <div class="topbar-title">Menuiserie Duval</div>
+  <div class="module-badge">Module 4</div>
+</div>
+
+<div class="module-header">
+  <div class="module-num">Module 4 — Tarification</div>
+  <div class="module-title">Prix de vente cible</div>
+  <div class="module-desc">Déterminez le prix permettant de maintenir le taux de MCV initial malgré la hausse du bois.</div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="showTab('exercice',this)">📝 Exercice</button>
+  <button class="tab-btn" onclick="showTab('memo',this)">📋 Mémo</button>
+</div>
+
+<!-- MÉMO -->
+<div class="tab-panel" id="panel-memo">
+  <div class="memo-wrap">
+    <div class="memo-section">
+      <div class="memo-section-title">Rappel — Données portes</div>
+      <div class="context-card">
+        Prix de vente initial : <span class="hl">320 €/u</span><br>
+        CV unitaire initial : <span class="hl">136 €/u</span> (MP 85 + Énergie 12 + Emballage 5 + S/T 18 + Comm. 16)<br>
+        Taux de MCV initial portes : <span class="hl">57,50 %</span><br><br>
+        <strong>Hausse bois +20 %</strong> → Nouvelles MP portes : <span class="hl">85 × 1,20 = 102 €/u</span>
+      </div>
+    </div>
+    <div class="memo-section">
+      <div class="memo-section-title">Formule prix cible</div>
+      <div class="context-card">
+        Pour conserver le même taux de MCV :<br><br>
+        <strong>PV cible = Nouveau CV unitaire ÷ (1 − Taux MCV initial)</strong><br><br>
+        Soit : PV = CV ÷ (1 − 0,575)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXERCICE -->
+<div class="tab-panel active" id="panel-exercice">
+  <div class="ex-wrap">
+    <div class="situation-card">
+      Suite à la hausse du bois (+20 %), la direction souhaite maintenir le <strong>taux de MCV initial des portes (57,50 %)</strong>. Quel prix doit-elle fixer ?
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">4.1 — Nouveau coût variable unitaire des portes</div>
+      <div class="question-hint">Intégrez la hausse de 20 % sur les matières premières uniquement.</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_new_cv_porte" placeholder="0"><span class="answer-unit">€/u</span></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">4.2 — Prix de vente cible des portes</div>
+      <div class="question-hint">PV = Nouveau CV ÷ (1 − Taux MCV initial) — arrondi à 2 décimales.</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_pv_cible" placeholder="0.00"><span class="answer-unit">€/u</span></div>
+    </div>
+
+    <div class="question-block">
+      <div class="question-label">4.3 — Variation du prix de vente</div>
+      <div class="question-hint">Écart en % entre le prix initial (320 €) et le nouveau prix cible.</div>
+      <div class="answer-row"><input type="number" class="answer-input" id="q_hausse_pv" placeholder="0.00"><span class="answer-unit">%</span></div>
+    </div>
+
+    <div class="question-block" style="background:var(--bg2);border:1px solid var(--border)">
+      <div class="question-label" style="font-size:13px;color:var(--text2)">Recommandation à la direction <span style="font-size:11px;font-weight:400;color:var(--text3)">(non noté)</span></div>
+      <div class="question-hint">Politique tarifaire, gamme de produits, approvisionnement…</div>
+      <textarea class="conclusion-area" id="q_conclusion" placeholder="Votre analyse et recommandations…"></textarea>
+    </div>
+  </div>
+
+  <div class="submit-zone">
+    <button class="btn-submit" id="btn-submit" onclick="soumettre()">Valider mes réponses</button>
+  </div>
+
+  <!-- RÉSULTATS MODULE 4 -->
+  <div class="results-panel" id="results-panel">
+    <div class="results-header">
+      <h2 id="results-name">Résultats — Module 4</h2>
+      <div class="score-big-sm" id="score-display">—</div>
+      <div class="score-label">/ 3 points</div>
+    </div>
+    <div class="results-body" id="results-body"></div>
+  </div>
+
+  <!-- PROFIL COMPLET SUR 20 -->
+  <div class="profil-panel" id="profil-panel">
+
+    <!-- Chargement -->
+    <div id="profil-loading" class="spinner-wrap">
+      <div class="spinner"></div>
+      <p>Calcul de votre note finale…</p>
+    </div>
+
+    <!-- Contenu profil (masqué jusqu'au chargement) -->
+    <div id="profil-content" style="display:none">
+      <div class="profil-hero">
+        <div class="profil-kicker">🎓 Résultats complets — Menuiserie Duval</div>
+        <div class="profil-name" id="p-name">—</div>
+        <div class="profil-classe" id="p-classe"></div>
+        <div class="profil-score-row">
+          <div class="score-big-20" id="p-score">—</div>
+          <div class="score-meta">
+            <div class="score-sur">/ 20 points</div>
+            <div class="score-mention" id="p-mention"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profil-body">
+        <div class="section-label">Détail par module</div>
+        <div id="modules-detail"></div>
+
+        <div class="total-row">
+          <div class="total-label">Note finale</div>
+          <div style="display:flex;align-items:baseline;gap:4px">
+            <div class="total-val" id="p-total">—</div>
+            <div class="total-sur">/ 20</div>
+          </div>
+        </div>
+
+        <div class="bilan-wrap" id="bilan-wrap"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /panel-exercice -->
+
+<div class="footer">Menuiserie Duval · Horizon PME Centre de formation</div>
+
+<script>
+
+// Lire profil depuis URL params (transmis par index.html) ou sessionStorage
+function lireProfil() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const nom = params.get('nom');
+    const prenom = params.get('prenom');
+    const classe = params.get('classe') || '';
+    if (nom && prenom) {
+      // Sauvegarder dans sessionStorage pour les pages suivantes
+      sessionStorage.setItem('duval_profil', JSON.stringify({nom, prenom, classe}));
+      return {nom, prenom, classe};
+    }
+  } catch(e) {}
+  // Fallback sessionStorage
+  try {
+    const p = JSON.parse(sessionStorage.getItem('duval_profil'));
+    if (p && p.nom) return p;
+  } catch(e) {}
+  return {};
+}
+
+// Ajouter le profil dans les liens vers d'autres modules
+function enrichirLiens() {
+  const p = lireProfil();
+  if (!p.nom) return;
+  document.querySelectorAll('a[href$=".html"]').forEach(a => {
+    try {
+      const url = new URL(a.href);
+      // Ne pas modifier les liens externes
+      if (url.hostname === window.location.hostname || a.href.indexOf('http') === -1) {
+        url.searchParams.set('nom', p.nom);
+        url.searchParams.set('prenom', p.prenom);
+        url.searchParams.set('classe', p.classe || '');
+        a.href = url.toString();
+      }
+    } catch(e) {}
+  });
+}
+
+window.addEventListener('DOMContentLoaded', enrichirLiens);
+
+const A = { new_cv_porte:153, pv_cible:360, hausse_pv:12.5 };
+
+const MODULES = [
+  { key:'etape-0',  label:'Classification des charges', max:4, detailKey:'classification', color:'c-0', tag:'Étape 0' },
+  { key:'module-1', label:'Marge sur coût variable',    max:5, detailKey:'mcv',            color:'c-1', tag:'Module 1' },
+  { key:'module-2', label:'Coût marginal',              max:4, detailKey:'cout_marginal',   color:'c-2', tag:'Module 2' },
+  { key:'module-3', label:'Seuil de rentabilité',       max:4, detailKey:'seuil_rentabilite', color:'c-3', tag:'Module 3' },
+  { key:'module-4', label:'Prix de vente cible',        max:3, detailKey:'prix_cible',      color:'c-4', tag:'Module 4' },
+];
+
+function tol(got,exp,pct=3){if(exp===0)return got===0;return Math.abs((got-exp)/exp)<=pct/100;}
+function num(id){return parseFloat(document.getElementById(id)?.value)||0;}
+function val(id){return document.getElementById(id)?.value||'';}
+
+function showTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function mention(score){
+  if(score>=16) return ['Très bien','mention-tb'];
+  if(score>=14) return ['Bien','mention-b'];
+  if(score>=12) return ['Assez bien','mention-ab'];
+  return ['Insuffisant','mention-ins'];
+}
+
+function feedbackLabel(pct){
+  if(pct>=90) return 'Excellent';
+  if(pct>=70) return 'Bien';
+  if(pct>=50) return 'À consolider';
+  return 'À retravailler';
+}
+
+async function afficherProfil(profil, scoreM4) {
+  // Fetch tous les résultats
+  let all = [];
+  try {
+    const r = await fetch('https://www.horizonpme.fr/get-results.php');
+    all = await r.json();
+  } catch(e) {}
+
+  const nomKey = ((profil.prenom||'')+(profil.nom||'')).toLowerCase().replace(/\s/g,'');
+  const matches = all.filter(r =>
+    ((r.prenom||'')+(r.nom||'')).toLowerCase().replace(/\s/g,'') === nomKey ||
+    (r.nom||'').toLowerCase().includes((profil.nom||'').toLowerCase())
+  );
+
+  // Agréger meilleur score par module
+  const scores = {};
+  const forces = [], faiblesses = [];
+
+  matches.forEach(r => {
+    Object.entries(r.detail||{}).forEach(([dk, s]) => {
+      const mod = MODULES.find(m => m.detailKey === dk);
+      if(mod && (scores[mod.key] === undefined || s > scores[mod.key])) {
+        scores[mod.key] = s;
+      }
+    });
+    if(r.forces) r.forces.split('|').forEach(f=>{ if(f.trim() && !forces.includes(f.trim())) forces.push(f.trim()); });
+    if(r.faiblesses) r.faiblesses.split('|').forEach(f=>{ if(f.trim() && !faiblesses.includes(f.trim())) faiblesses.push(f.trim()); });
+  });
+
+  // S'assurer que module-4 a bien le score qu'on vient de soumettre
+  if(scores['module-4'] === undefined || scoreM4 > scores['module-4']) scores['module-4'] = scoreM4;
+
+  // Total
+  let total = 0;
+  MODULES.forEach(m => { total += scores[m.key] || 0; });
+  total = Math.round(total * 10) / 10;
+
+  // Remplir hero
+  document.getElementById('p-name').innerHTML = `${profil.prenom||''} <em>${profil.nom||''}</em>`;
+  document.getElementById('p-classe').textContent = profil.classe || 'Menuiserie Duval';
+  document.getElementById('p-score').textContent = total.toFixed(1);
+  document.getElementById('p-total').textContent = total.toFixed(1);
+  const [men, menClass] = mention(total);
+  const menEl = document.getElementById('p-mention');
+  menEl.textContent = men; menEl.className = 'score-mention ' + menClass;
+
+  // Modules
+  let modsHtml = '';
+  MODULES.forEach(m => {
+    const s = scores[m.key];
+    const done = s !== undefined;
+    const pct = done ? Math.round((s / m.max) * 100) : 0;
+    const fb = done ? feedbackLabel(pct) : 'Non complété';
+    modsHtml += `
+    <div class="mod-row">
+      <div class="mod-bar ${m.color}"></div>
+      <div class="mod-content">
+        <div class="mod-top">
+          <div>
+            <div class="mod-tag">${m.tag}</div>
+            <div class="mod-name">${m.label}</div>
+          </div>
+          <div class="mod-score-val" style="color:${done?'var(--text)':'var(--text3)'}">${done ? s.toFixed(1) : '—'} <span style="font-size:10px;color:var(--text3);font-weight:400">/ ${m.max}</span></div>
+        </div>
+        <div class="mod-bar-bg"><div class="mod-bar-fill ${m.color}" style="width:${pct}%;opacity:.85"></div></div>
+        <div class="mod-feedback">${fb}</div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('modules-detail').innerHTML = modsHtml;
+
+  // Bilan
+  let bilanHtml = '';
+  if(forces.length) {
+    bilanHtml += `<div class="bilan-section"><div class="bilan-title good">Points forts</div>${forces.map(f=>`<div class="bilan-item"><span>✅</span><span>${f}</span></div>`).join('')}</div>`;
+  }
+  if(faiblesses.length) {
+    bilanHtml += `<div class="bilan-section"><div class="bilan-title bad">Points à retravailler</div>${faiblesses.map(f=>`<div class="bilan-item"><span>❌</span><span>${f}</span></div>`).join('')}</div>`;
+  }
+  document.getElementById('bilan-wrap').innerHTML = bilanHtml;
+
+  // Afficher
+  document.getElementById('profil-loading').style.display = 'none';
+  document.getElementById('profil-content').style.display = 'block';
+}
+
+async function soumettre() {
+  let correct = 0;
+  if(tol(num('q_new_cv_porte'), A.new_cv_porte)) correct++;
+  if(tol(num('q_pv_cible'), A.pv_cible)) correct++;
+  if(tol(num('q_hausse_pv'), A.hausse_pv)) correct++;
+  const score = Math.round((correct/3)*3*10)/10;
+
+  const profil = lireProfil();
+
+  // Affichage résultats module 4
+  document.getElementById('results-name').textContent = (profil.prenom ? profil.prenom+' '+profil.nom : '') || 'Résultats — Module 4';
+  document.getElementById('score-display').textContent = score.toFixed(1);
+
+  let html = '';
+  if(correct===3) html+=`<div class="fb-section"><h3 class="good">Excellent</h3><div class="fb-item"><span>✅</span><span>Calcul du prix cible parfaitement maîtrisé.</span></div></div>`;
+  else if(correct>=2) html+=`<div class="fb-section"><h3 class="warn">Bien</h3><div class="fb-item"><span>⚠️</span><span>${correct}/3 — Vérifiez la relation PV = CV ÷ (1 − taux MCV).</span></div></div>`;
+  else html+=`<div class="fb-section"><h3 class="bad">À retravailler</h3><div class="fb-item"><span>❌</span><span>${correct}/3 — La démarche de fixation du prix à partir du taux de MCV est à retravailler.</span></div></div>`;
+
+  html+=`<div class="fb-section"><h3 style="color:var(--text3);border-color:var(--border)">Corrigé</h3>
+    <div class="fb-item"><span>📌</span><span>Nouveau CV portes : <strong>153 €/u</strong> (102+12+5+18+16)</span></div>
+    <div class="fb-item"><span>📌</span><span>Prix de vente cible : <strong>360 €/u</strong> (153 ÷ 0,425)</span></div>
+    <div class="fb-item"><span>📌</span><span>Variation : <strong>+12,5 %</strong> ((360−320)÷320)</span></div>
+  </div>`;
+
+  const conclusion = val('q_conclusion');
+  if(conclusion) html+=`<div class="fb-section"><h3 style="color:var(--text3);border-color:var(--border)">Votre recommandation</h3><p style="font-size:13px;font-style:italic;line-height:1.6">${conclusion}</p></div>`;
+
+  document.getElementById('results-body').innerHTML = html;
+  document.getElementById('results-panel').classList.add('visible');
+
+  // Désactiver le bouton
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('btn-submit').style.opacity = '.5';
+
+  // Sauvegarder
+  const force4 = correct===3 ? 'Module 4 — Prix cible : Calcul du prix pour maintenir la marge parfaitement réalisé.' : '';
+  const faiblesse4 = correct<2 ? 'Module 4 — Prix cible : Relation PV = CV / (1 − taux MCV) à retravailler.' : correct<3 ? 'Module 4 — Prix cible : Vérifier la relation taux MCV / prix de vente.' : '';
+  try {
+    await fetch('https://www.horizonpme.fr/save-results.php', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        nom:profil.nom||'', prenom:profil.prenom||'', classe:profil.classe||'',
+        score, detail:{prix_cible:score},
+        forces:force4, faiblesses:faiblesse4, conclusion
+      })
+    });
+  } catch(e) {}
+
+  // Afficher le profil complet
+  document.getElementById('profil-panel').classList.add('visible');
+  document.getElementById('profil-panel').scrollIntoView({behavior:'smooth', block:'start'});
+
+  // Petit délai pour laisser le serveur enregistrer avant de refetch
+  await new Promise(r => setTimeout(r, 800));
+  await afficherProfil(profil, score);
+}
+</script>
+</body>
+</html>
